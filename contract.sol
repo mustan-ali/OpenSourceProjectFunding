@@ -53,7 +53,10 @@ contract OpenSourceProjectFunding {
     }
 
     event ProjectCreated(uint256 indexed projectId, address indexed owner, string name, uint256 fundingGoal, string url);
-    event Funded( uint256 indexed projectId, address indexed contributor, uint256 amount);
+    event ProjectContributed(uint256 indexed projectId, address indexed contributor, uint256 amount);
+    event ProjectWithdrawn(uint256 indexed projectId);
+    event ProjectExpired(uint256 indexed projectId);
+    event ProjectCompleted(uint256 indexed projectId);
 
     function createProject( string memory _name, string memory _description, string memory _url, uint256 _fundingGoal, uint256 _deadline) public payable {
 
@@ -91,7 +94,8 @@ contract OpenSourceProjectFunding {
         Project storage project = projects[_projectId];
 
         if (!project.isExpired && block.timestamp >= project.deadline && !project.isCompleted) {
-             project.isExpired = true;
+            project.isExpired = true;
+            emit ProjectExpired(_projectId);
         }
 
     }
@@ -120,9 +124,11 @@ contract OpenSourceProjectFunding {
 
         if (project.totalFunds >= project.fundingGoal) {
             project.isCompleted = true;
+            emit ProjectCompleted(_projectId);
         }
 
-        emit Funded(_projectId, msg.sender, msg.value);
+        emit ProjectContributed(_projectId, msg.sender, msg.value - feeAmount);
+
     }
 
     function getEarlyWithdrawalFee(uint256 _projectId) public view returns (uint256) {
@@ -156,5 +162,7 @@ contract OpenSourceProjectFunding {
 
         contractOwner.transfer(feeAmount);
         project.isWithdrawn = true;
+
+        emit ProjectWithdrawn(_projectId);
     }
 }
