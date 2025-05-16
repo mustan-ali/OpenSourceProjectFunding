@@ -48,6 +48,10 @@ contract OpenSourceProjectFunding {
         contributionFee = _contributionFee;
     }
 
+    function setEarlyWithdrawalFee(uint256 _earlyWithdrawalFee) public onlyOwner {
+        earlyWithdrawalFee = _earlyWithdrawalFee;
+    }
+
     event ProjectCreated(uint256 indexed projectId, address indexed owner, string name, uint256 fundingGoal, string url);
     event Funded( uint256 indexed projectId, address indexed contributor, uint256 amount);
 
