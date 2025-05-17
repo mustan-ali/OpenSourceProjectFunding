@@ -18,9 +18,9 @@ contract OpenSourceProjectFunding {
 
     uint256 projectCount;
     address payable contractOwner;
-    uint256 creationFee;
-    uint256 contributionFee;
-    uint256 earlyWithdrawalFee;
+    uint256 public creationFee;
+    uint256 public contributionFee;
+    uint256 public earlyWithdrawalFee;
     mapping(uint256 => Project) public projects;
     mapping(uint256 => mapping(address => uint256)) public contributions;
 
@@ -86,24 +86,25 @@ contract OpenSourceProjectFunding {
 
         emit ProjectCreated(projectCount, msg.sender, _name, _fundingGoal, _url);
         projectCount++;
+        updateProjectStatus();
     }
 
-    function checkProjectStatus(uint256 _projectId) public {
-        require(_projectId < projectCount, "Invalid project ID");
+    function getProjectCount() public view returns (uint256) {
+        return projectCount;
+    }
 
-        Project storage project = projects[_projectId];
-
-        if (!project.isExpired && block.timestamp >= project.deadline && !project.isCompleted) {
-            project.isExpired = true;
-            emit ProjectExpired(_projectId);
+    function updateProjectStatus() public {
+        for (uint256 i = 0; i < projectCount; i++) {
+            if (projects[i].isExpired == false && block.timestamp >= projects[i].deadline && projects[i].isCompleted == false) {
+                projects[i].isExpired = true;
+            }
         }
-
     }
 
     function contribute(uint256 _projectId) public payable {
         require(_projectId < projectCount, "Invalid project ID");
 
-        checkProjectStatus(_projectId);
+        updateProjectStatus();
         Project storage project = projects[_projectId];
 
         require(msg.sender != project.owner, "You can't contribute to your own projects");
@@ -147,8 +148,8 @@ contract OpenSourceProjectFunding {
 
     function withdrawEarly(uint256 _projectId) public payable {
         require(_projectId < projectCount, "Invalid project ID");
+        updateProjectStatus();
 
-        checkProjectStatus(_projectId);
         Project storage project = projects[_projectId];
 
         require(msg.sender == project.owner, "Only the project owner can withdraw early");
