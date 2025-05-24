@@ -8,6 +8,9 @@ import ProjectList from "./components/ProjectList";
 import CreateProject from "./components/CreateProject";
 import Contribute from "./components/Contribute";
 import EarlyWithdrawal from "./components/EarlyWithdrawal";
+import AdminPanel from "./components/AdminPanel";
+
+import "./App.css";
 
 export default function App() {
   const [provider, setProvider] = useState(null);
@@ -17,6 +20,10 @@ export default function App() {
 
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
+
+  const [creationFee, setCreationFee] = useState(null);
+  const [contributionFee, setContributionFee] = useState(null);
+  const [earlyWithdrawalFee, setEarlyWithdrawalFee] = useState(null);
 
   async function connectWallet() {
     if (!window.ethereum) {
@@ -39,6 +46,22 @@ export default function App() {
     setSigner(newSigner);
     setAccount(address);
     setContract(contractInstance);
+
+    await fetchContractDetails(contractInstance);
+  }
+
+  async function fetchContractDetails(contractInstance) {
+    try {
+      const creation = await contractInstance.creationFee();
+      const contribution = await contractInstance.contributionFee();
+      const earlyWithdrawal = await contractInstance.earlyWithdrawalFee();
+
+      setCreationFee(ethers.formatEther(creation));
+      setContributionFee(contribution.toString());
+      setEarlyWithdrawalFee(earlyWithdrawal.toString());
+    } catch (err) {
+      console.error("Failed to fetch contract details:", err);
+    }
   }
 
   function disconnectWallet() {
@@ -46,6 +69,10 @@ export default function App() {
     setSigner(null);
     setAccount(null);
     setContract(null);
+
+    setCreationFee(null);
+    setContributionFee(null);
+    setEarlyWithdrawalFee(null);
   }
 
   async function loadProjects() {
@@ -83,7 +110,6 @@ export default function App() {
     // eslint-disable-next-line
   }, [contract]);
 
-  // Listen for account changes
   useEffect(() => {
     if (!window.ethereum) return;
 
@@ -104,17 +130,40 @@ export default function App() {
 
   return (
     <div>
-      <h1>Open Source Project Funding</h1>
+      <div className="wallet-header">
+        <div className="left-section">
+          <h1>Open Source Project Funding</h1>
+          {provider && <p className="account-info">Connected as: {account}</p>}
+        </div>
 
-      {!provider ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
-      ) : (
+        {!provider ? (
+          <button className="wallet-button" onClick={connectWallet}>
+            Connect Wallet
+          </button>
+        ) : (
+          <button className="wallet-button" onClick={disconnectWallet}>
+            Disconnect
+          </button>
+        )}
+      </div>
+
+      {provider && (
         <>
-          <p>Connected as: {account}</p>
-          <button onClick={disconnectWallet}>Disconnect</button>
-          <CreateProject contract={contract} reloadProjects={loadProjects} />
-          <Contribute contract={contract} reloadProjects={loadProjects} />
-          <EarlyWithdrawal contract={contract} reloadProjects={loadProjects} />
+          <div className="three-column-layout">
+            <div className="column admin-panel-col">
+              <AdminPanel contract={contract} />
+            </div>
+
+            <div className="column create-project-col">
+              <CreateProject contract={contract} reloadProjects={loadProjects} />
+            </div>
+
+            <div className="column contribute-withdraw-col">
+              <Contribute contract={contract} reloadProjects={loadProjects} />
+              <EarlyWithdrawal contract={contract} reloadProjects={loadProjects} />
+            </div>
+          </div>
+
           <ProjectList projects={projects} loading={loadingProjects} />
         </>
       )}

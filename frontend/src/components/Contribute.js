@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
+import "./Contribute.css";
 
 
 export default function Contribute({ contract, reloadProjects }) {
@@ -25,7 +26,7 @@ export default function Contribute({ contract, reloadProjects }) {
     }
 
     return (
-        <>
+        <div className="contribute">
             <h2>Contribute to Project</h2>
             <form onSubmit={handleSubmit}>
                 <input
@@ -47,6 +48,6 @@ export default function Contribute({ contract, reloadProjects }) {
                 <button type="submit">Contribute</button>
                 {message && <p>{message}</p>}
             </form>
-        </>
+        </div>
     );
 }

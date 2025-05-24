@@ -1,0 +1,120 @@
+.project-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 30px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.project-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 390px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+}
+
+.project-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.project-title {
+    font-size: 20px;
+    color: #222;
+    font-weight: 700;
+    margin: 0;
+}
+
+.project-status {
+    margin-left: 10px;
+}
+
+.project-card p {
+    font-size: 14px;
+    color: #444;
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+.project-card span {
+    font-weight: 600;
+    color: #555;
+    display: inline-block;
+}
+
+.project-card a {
+    color: #1976d2;
+    text-decoration: none;
+    word-break: break-word;
+}
+
+.project-card a:hover {
+    text-decoration: underline;
+}
+
+.project-info-group {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    margin-left: 6px;
+    white-space: nowrap;
+}
+
+.status-completed {
+    background-color: #4caf50;
+}
+
+.status-expired {
+    background-color: #f44336;
+}
+
+.status-withdrawn {
+    background-color: #ff9800;
+}
+
+.status-ongoing {
+    background-color: #03a9f4;
+}
+
+.project-heading {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 50px 0 0px;
+    color: #333;
+}
+
+@media (max-width: 1200px) {
+    .project-card {
+        max-width: 45%;
+    }
+}
+
+@media (max-width: 768px) {
+    .project-card {
+        max-width: 100%;
+    }
+}

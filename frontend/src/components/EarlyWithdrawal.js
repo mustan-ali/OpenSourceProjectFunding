@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./EarlyWithdrawal.css";
 
 export default function ProjectWithdraw({ contract, reloadProjects }) {
     const [projectId, setProjectId] = useState("");
@@ -25,7 +26,7 @@ export default function ProjectWithdraw({ contract, reloadProjects }) {
     }
 
     return (
-        <div>
+        <div className="withdraw">
             <h2>Withdraw Project Early</h2>
             <input
                 type="number"

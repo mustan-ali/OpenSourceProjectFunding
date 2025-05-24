@@ -1,0 +1,56 @@
+.create-project {
+    max-width: 600px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.create-project h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.create-project form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.create-project input,
+.create-project textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.create-project input:focus,
+.create-project textarea:focus {
+    outline: none;
+    border-color: #4caf50;
+    box-shadow: 0 0 3px #4caf5077;
+}
+
+.create-project button {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-project button:hover {
+    background-color: #388e3c;
+}
+
+.create-project p {
+    color: red;
+    text-align: center;
+}

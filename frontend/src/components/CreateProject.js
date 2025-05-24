@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
+import "./CreateProject.css";
 
 export default function CreateProject({ contract, reloadProjects }) {
     const [message, setMessage] = useState("");
@@ -17,9 +18,8 @@ export default function CreateProject({ contract, reloadProjects }) {
 
         try {
             const fundingGoalWei = ethers.parseEther(newProject.fundingGoal);
-            const deadlineSeconds = Number(newProject.deadline);
+            const deadlineSeconds = Number(newProject.deadline) * 60;
 
-            // const creationFee = ethers.parseEther("0.01");
             const creationFee = await contract.creationFee();
 
             const tx = await contract.createProject(
@@ -47,7 +47,7 @@ export default function CreateProject({ contract, reloadProjects }) {
     }
 
     return (
-        <>
+        <div className="create-project">
             <h2>Create New Project</h2>
             <form onSubmit={handleSubmit}>
                 <input
@@ -82,13 +82,13 @@ export default function CreateProject({ contract, reloadProjects }) {
                     required
                     type="number"
                     min="1"
-                    placeholder="Deadline (seconds from now)"
+                    placeholder="Deadline (minutes from now)"
                     value={newProject.deadline}
                     onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
                 />
                 <button type="submit">Create Project</button>
                 {message && <p>{message}</p>}
             </form>
-        </>
+        </div>
     );
 }
