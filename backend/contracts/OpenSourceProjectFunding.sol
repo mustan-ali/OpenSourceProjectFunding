@@ -141,6 +141,10 @@ contract OpenSourceProjectFunding {
         require(!project.isExpired, "Project has expired");
         require(!project.isCompleted, "Project has already been completed");
         require(!project.isWithdrawn, "Project has already been withdrawn");
+
+        if (project.totalFunds == 0) {
+            return creationFee;
+        }
      
         return (project.totalFunds * earlyWithdrawalFee) / 100;
     }

@@ -1,0 +1,17 @@
+.contribution-page {
+    padding: 2rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    border-bottom: 1px solid #ddd;
+    padding: 12px;
+    /* text-align: left; */
+    text-align: center;
+}

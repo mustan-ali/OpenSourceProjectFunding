@@ -1,5 +1,6 @@
 /* eslint-disable */
 import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ethers } from "ethers";
 
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "./contract";
@@ -9,6 +10,7 @@ import CreateProject from "./components/CreateProject";
 import Contribute from "./components/Contribute";
 import EarlyWithdrawal from "./components/EarlyWithdrawal";
 import AdminPanel from "./components/AdminPanel";
+import ProjectContributions from "./components/ProjectContributions";
 
 import "./App.css";
 
@@ -20,10 +22,6 @@ export default function App() {
 
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
-
-  const [creationFee, setCreationFee] = useState(null);
-  const [contributionFee, setContributionFee] = useState(null);
-  const [earlyWithdrawalFee, setEarlyWithdrawalFee] = useState(null);
 
   async function connectWallet() {
     if (!window.ethereum) {
@@ -69,10 +67,6 @@ export default function App() {
     setSigner(null);
     setAccount(null);
     setContract(null);
-
-    setCreationFee(null);
-    setContributionFee(null);
-    setEarlyWithdrawalFee(null);
   }
 
   async function loadProjects() {
@@ -97,7 +91,6 @@ export default function App() {
           isWithdrawn: p[10],
         });
       }
-
       setProjects(loadedProjects);
     } catch (e) {
       console.error(e);
@@ -129,44 +122,61 @@ export default function App() {
   }, []);
 
   return (
-    <div>
-      <div className="wallet-header">
-        <div className="left-section">
-          <h1>Open Source Project Funding</h1>
-          {provider && <p className="account-info">Connected as: {account}</p>}
-        </div>
-
-        {!provider ? (
-          <button className="wallet-button" onClick={connectWallet}>
-            Connect Wallet
-          </button>
-        ) : (
-          <button className="wallet-button" onClick={disconnectWallet}>
-            Disconnect
-          </button>
-        )}
-      </div>
-
-      {provider && (
-        <>
-          <div className="three-column-layout">
-            <div className="column admin-panel-col">
-              <AdminPanel contract={contract} />
-            </div>
-
-            <div className="column create-project-col">
-              <CreateProject contract={contract} reloadProjects={loadProjects} />
-            </div>
-
-            <div className="column contribute-withdraw-col">
-              <Contribute contract={contract} reloadProjects={loadProjects} />
-              <EarlyWithdrawal contract={contract} reloadProjects={loadProjects} />
-            </div>
+    <Router>
+      <div>
+        {/* Wallet Header visible on all pages */}
+        <div className="wallet-header">
+          <div className="left-section">
+            <h1>Open Source Project Funding</h1>
+            {provider && <p className="account-info">Connected as: {account}</p>}
           </div>
 
-          <ProjectList projects={projects} loading={loadingProjects} />
-        </>
-      )}
-    </div>
+          {!provider ? (
+            <button className="wallet-button" onClick={connectWallet}>
+              Connect Wallet
+            </button>
+          ) : (
+            <button className="wallet-button" onClick={disconnectWallet}>
+              Disconnect
+            </button>
+          )}
+        </div>
+
+        {provider && (
+          <Routes>
+            {/* Home page with all main components */}
+            <Route
+              path="/"
+              element={
+                <>
+                  <div className="three-column-layout">
+                    <div className="column admin-panel-col">
+                      <AdminPanel contract={contract} />
+                    </div>
+
+                    <div className="column create-project-col">
+                      <CreateProject contract={contract} reloadProjects={loadProjects} />
+                    </div>
+
+                    <div className="column contribute-withdraw-col">
+                      <Contribute contract={contract} reloadProjects={loadProjects} />
+                      <EarlyWithdrawal contract={contract} reloadProjects={loadProjects} />
+                    </div>
+                  </div>
+
+                  <ProjectList projects={projects} loading={loadingProjects} />
+                </>
+              }
+            />
+
+            {/* Contributions page only shows contributions component */}
+            <Route
+              path="/project/:projectId/contributions"
+              element={<ProjectContributions contract={contract} />}
+            />
+          </Routes>
+        )}
+      </div>
+    </Router>
   );
 }

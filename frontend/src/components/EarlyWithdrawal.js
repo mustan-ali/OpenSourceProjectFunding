@@ -12,14 +12,19 @@ export default function ProjectWithdraw({ contract, reloadProjects }) {
         setMessage("");
 
         try {
-            const tx = await contract.withdrawEarly(projectId);
+            // Get early withdrawal fee from the contract
+            const fee = await contract.getEarlyWithdrawalFee(projectId);
+
+            // Send transaction with required fee
+            const tx = await contract.withdrawEarly(projectId, { value: fee });
             await tx.wait();
+
             setMessage("Withdrawal successful!");
             setProjectId("");
             reloadProjects();
         } catch (err) {
             console.error(err);
-            setMessage("Withdrawal failed: " + (err?.reason || "Unknown error"));
+            setMessage("Withdrawal failed: " + (err?.reason || err?.message || "Unknown error"));
         }
 
         setLoading(false);

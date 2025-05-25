@@ -107,6 +107,14 @@
     color: #333;
 }
 
+.project-number {
+    border: 2px solid;
+    border-radius: 6px;
+    padding: 3px 5px;
+    color: #ffffff !important;
+    background-color: black;
+}
+
 @media (max-width: 1200px) {
     .project-card {
         max-width: 45%;

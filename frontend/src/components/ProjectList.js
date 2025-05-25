@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./ProjectList.css";
 
 export default function ProjectList({ projects, loading }) {
@@ -13,7 +14,7 @@ export default function ProjectList({ projects, loading }) {
                     <div className="project-card" key={p.projectNumber}>
                         <div className="project-title-row">
                             <h3 className="project-title">
-                                Project #{p.projectNumber} - {p.name
+                                <span className="project-number">Project {p.projectNumber}</span> {p.name
                                     .split(" ")
                                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                                     .join(" ")}
@@ -46,6 +47,12 @@ export default function ProjectList({ projects, loading }) {
                             <p><span>Funding Goal:</span> {p.fundingGoal} ETH</p>
                             <p><span>Total Funds:</span> {p.totalFunds} ETH</p>
                             <p><span>Deadline:</span> {p.deadline.toLocaleString()}</p>
+                        </div>
+
+                        <div className="view-contribution-button">
+                            <Link to={`/project/${p.projectNumber}/contributions`} className="view-btn">
+                                View Contributions
+                            </Link>
                         </div>
                     </div>
                 ))}
