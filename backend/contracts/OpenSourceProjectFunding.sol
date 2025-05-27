@@ -108,7 +108,7 @@ contract OpenSourceProjectFunding {
     // Function to update the status of projects that have passed their deadlines
     function updateProjectStatus() public {
         for (uint256 i = 0; i < projectCount; i++) {
-            if (!projects[i].isExpired && block.timestamp >= projects[i].deadline && !projects[i].isCompleted) {
+            if (!projects[i].isExpired && block.timestamp >= projects[i].deadline && !projects[i].isCompleted && !projects[i].isWithdrawn) {
                 projects[i].isExpired = true;
                 emit ProjectExpired(i);
             }
@@ -181,7 +181,7 @@ contract OpenSourceProjectFunding {
         require(!project.isCompleted, "Project has already been completed");
         require(!project.isWithdrawn, "Project has already been withdrawn");
 
-        uint256 feeAmount = (project.totalFunds * earlyWithdrawalFee) / 100;
+        uint256 feeAmount = getEarlyWithdrawalFee(_projectId);
         require(msg.value == feeAmount, "Insufficient fee to withdraw early");
 
         contractOwner.transfer(feeAmount);
