@@ -3,7 +3,9 @@ import { ethers } from "ethers";
 import "./CreateProject.css";
 
 export default function CreateProject({ contract, reloadProjects }) {
-    const [message, setMessage] = useState("");
+
+    // State to handle user input and messages
+    const [message, setMessage] = useState(""); // Error/success messages
     const [newProject, setNewProject] = useState({
         name: "",
         description: "",
@@ -12,26 +14,35 @@ export default function CreateProject({ contract, reloadProjects }) {
         deadline: "",
     });
 
+    // Handles form submission
     async function handleSubmit(e) {
-        e.preventDefault();
+        e.preventDefault(); // Prevent page reload on form submit
         if (!contract) return;
 
         try {
+            // Convert human-readable ETH to wei
             const fundingGoalWei = ethers.parseEther(newProject.fundingGoal);
+
+            // Convert deadline from minutes to seconds
             const deadlineSeconds = Number(newProject.deadline) * 60;
 
+            // Fetch required creation fee from contract
             const creationFee = await contract.creationFee();
 
+            // Create project on-chain
             const tx = await contract.createProject(
                 newProject.name,
                 newProject.description,
                 newProject.url,
                 fundingGoalWei,
                 deadlineSeconds,
-                { value: creationFee }
+                { value: creationFee } // Must send creation fee
             );
-            await tx.wait();
+
+            await tx.wait(); // Wait for transaction confirmation
             alert("Project created!");
+
+            // Reset form
             setNewProject({
                 name: "",
                 description: "",
@@ -39,6 +50,8 @@ export default function CreateProject({ contract, reloadProjects }) {
                 fundingGoal: "",
                 deadline: "",
             });
+
+            // Refresh project list in UI
             reloadProjects();
         } catch (err) {
             console.error(err);
@@ -46,16 +59,21 @@ export default function CreateProject({ contract, reloadProjects }) {
         }
     }
 
+    // Render the project creation form
     return (
         <div className="create-project">
             <h2>Create New Project</h2>
             <form onSubmit={handleSubmit}>
+
+                {/* Project Name */}
                 <input
                     required
                     placeholder="Name"
                     value={newProject.name}
                     onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
                 />
+
+                {/* Description */}
                 <textarea
                     required
                     placeholder="Description"
@@ -63,12 +81,16 @@ export default function CreateProject({ contract, reloadProjects }) {
                     value={newProject.description}
                     onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                 />
+
+                {/* Project URL */}
                 <input
                     required
                     placeholder="Project URL"
                     value={newProject.url}
                     onChange={(e) => setNewProject({ ...newProject, url: e.target.value })}
                 />
+
+                {/* Funding Goal in ETH */}
                 <input
                     required
                     type="number"
@@ -78,6 +100,8 @@ export default function CreateProject({ contract, reloadProjects }) {
                     value={newProject.fundingGoal}
                     onChange={(e) => setNewProject({ ...newProject, fundingGoal: e.target.value })}
                 />
+
+                {/* Deadline in minutes */}
                 <input
                     required
                     type="number"
@@ -86,7 +110,10 @@ export default function CreateProject({ contract, reloadProjects }) {
                     value={newProject.deadline}
                     onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
                 />
+
                 <button type="submit">Create Project</button>
+
+                {/* Show error message if any */}
                 {message && <p>{message}</p>}
             </form>
         </div>
