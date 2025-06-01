@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ethers } from "ethers";
 import "./EarlyWithdrawal.css";
 
 export default function ProjectWithdraw({ contract, reloadProjects }) {
@@ -19,17 +20,27 @@ export default function ProjectWithdraw({ contract, reloadProjects }) {
             // Fetch the required early withdrawal fee from the contract
             const fee = await contract.getEarlyWithdrawalFee(projectId);
 
-            // Call smart contract's early withdrawal method and send required ETH fee
-            const tx = await contract.withdrawEarly(projectId, { value: fee });
-            await tx.wait(); // Wait for transaction confirmation
+            // Show confirm dialog with the fee (converted to ETH string)
+            const feeInEth = ethers.formatEther(fee);
+            const userConfirmed = window.confirm(
+                `The early withdrawal fee is ${feeInEth} ETH.\nDo you want to proceed?`
+            );
 
-            // Success
+            if (!userConfirmed) {
+                setMessage("Withdrawal cancelled by user.");
+                setLoading(false);
+                return; // Exit without calling the transaction
+            }
+
+            // User confirmed, call the smart contract withdrawal function with the fee
+            const tx = await contract.withdrawEarly(projectId, { value: fee });
+            await tx.wait(); // Wait for confirmation
+
             setMessage("Withdrawal successful!");
             setProjectId("");
-            reloadProjects(); // Refresh project data after withdrawal
+            reloadProjects();
         } catch (err) {
             console.error(err);
-            // Show error message
             setMessage("Withdrawal failed: " + (err?.reason || err?.message || "Unknown error"));
         }
 
