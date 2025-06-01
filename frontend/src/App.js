@@ -21,10 +21,15 @@ export default function App() {
   const [provider, setProvider] = useState(null);        // Ethers provider
   const [signer, setSigner] = useState(null);            // Connected user's signer
   const [contract, setContract] = useState(null);        // Smart contract instance
+  const [ownerAddress, setOwnerAddress] = useState(null); // Address of contract owner
   const [account, setAccount] = useState(null);          // User Ethereum address
 
   const [projects, setProjects] = useState([]);          // List of all loaded projects
   const [loadingProjects, setLoadingProjects] = useState(false); // Loading flag
+
+  const [networkName, setNetworkName] = useState(null);  // Network name (e.g., localhost, mainnet)
+  const [chainId, setChainId] = useState(null);          // Current chain ID
+  const [networkWarning, setNetworkWarning] = useState(""); // Warning if not on correct network
 
   // Wallet Connection
   async function connectWallet() {
@@ -39,36 +44,49 @@ export default function App() {
     const newSigner = await newProvider.getSigner();
     const address = await newSigner.getAddress();
 
-    // Instantiate the smart contract using the signer
-    const contractInstance = new ethers.Contract(
-      CONTRACT_ADDRESS,
-      CONTRACT_ABI,
-      newSigner
-    );
+    // Get the network and validate chain
+    const network = await newProvider.getNetwork();
+    const newChainId = Number(network.chainId);
+
+    // Show warning if not on expected chain
+    if (newChainId !== 31337) {
+      setNetworkWarning(
+        "Please switch to the Hardhat local network (chain ID 31337)."
+      );
+    } else {
+      setNetworkWarning("");
+    }
+
+    let contractInstance;
+    let contractOwner = null;
+
+    try {
+      // Instantiate contract using signer
+      contractInstance = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        CONTRACT_ABI,
+        newSigner
+      );
+
+      // Fetch owner of contract
+      contractOwner = await contractInstance.contractOwner();
+    } catch (error) {
+      console.warn("Contract not available on this network:", error.message);
+      contractInstance = null;
+    }
 
     // Save to state
     setProvider(newProvider);
     setSigner(newSigner);
     setAccount(address);
     setContract(contractInstance);
+    setOwnerAddress(contractOwner);
+    setNetworkName(network.name);
+    setChainId(newChainId);
 
-    // Optionally fetch contract parameters (fees, etc.)
-    await fetchContractDetails(contractInstance);
-  }
-
-  // Fetch basic contract config
-  async function fetchContractDetails(contractInstance) {
-    try {
-      const creation = await contractInstance.creationFee();
-      const contribution = await contractInstance.contributionFee();
-      const earlyWithdrawal = await contractInstance.earlyWithdrawalFee();
-
-      // These can be used if you add state to show them in the UI
-      setCreationFee(ethers.formatEther(creation));
-      setContributionFee(contribution.toString());
-      setEarlyWithdrawalFee(earlyWithdrawal.toString());
-    } catch (err) {
-      console.error("Failed to fetch contract details:", err);
+    // Fetch project list and contract-level details
+    if (contractInstance) {
+      await fetchContractDetails(contractInstance);
     }
   }
 
@@ -78,6 +96,22 @@ export default function App() {
     setSigner(null);
     setAccount(null);
     setContract(null);
+    setNetworkName(null);
+    setChainId(null);
+    setNetworkWarning("");
+  }
+
+  // Fetch basic contract config (creation fee, contribution fee, etc.)
+  async function fetchContractDetails(contractInstance) {
+    try {
+      const creation = await contractInstance.creationFee();
+      const contribution = await contractInstance.contributionFee();
+      const earlyWithdrawal = await contractInstance.earlyWithdrawalFee();
+
+      // If needed, store these in state
+    } catch (err) {
+      console.error("Failed to fetch contract details:", err);
+    }
   }
 
   // Load all projects from contract
@@ -119,9 +153,22 @@ export default function App() {
     // eslint-disable-next-line
   }, [contract]);
 
-  // Listen for account changes (MetaMask)
+  // Auto-reconnect wallet if already connected previously
   useEffect(() => {
-    if (!window.ethereum) return;
+    async function checkAndReconnect() {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+
+        // If accounts exist, user previously connected wallet
+        if (accounts.length > 0) {
+          await connectWallet(); // Reconnect automatically
+        }
+      }
+    }
+
+    checkAndReconnect();
+
+    // MetaMask Event Listeners
 
     const handleAccountsChanged = (accounts) => {
       if (accounts.length === 0) {
@@ -131,13 +178,27 @@ export default function App() {
       }
     };
 
-    window.ethereum.on("accountsChanged", handleAccountsChanged);
+    const handleChainChanged = async () => {
+      await connectWallet(); // Reload state if network changes
+    };
+
+    window.ethereum?.on("accountsChanged", handleAccountsChanged);
+    window.ethereum?.on("chainChanged", handleChainChanged);
 
     return () => {
-      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      window.ethereum?.removeListener("accountsChanged", handleAccountsChanged);
+      window.ethereum?.removeListener("chainChanged", handleChainChanged);
     };
   }, []);
 
+  // Determine readable network name
+  const displayNetwork =
+    chainId === 31337
+      ? "Hardhat (Local)"
+      : `${networkName || "Unknown"} (Chain ID: ${chainId})`;
+
+  // Determine if current user is admin
+  const isAdmin = account?.toLowerCase() === ownerAddress?.toLowerCase();
 
   return (
     <Router>
@@ -146,7 +207,12 @@ export default function App() {
         <div className="wallet-header">
           <div className="left-section">
             <h1>Open Source Project Funding</h1>
-            {provider && <p className="account-info">Connected as: {account}</p>}
+            {provider && (
+              <>
+                <p className="account-info">Connected as: {account}</p>
+                <p className="account-info">Network: {displayNetwork}</p>
+              </>
+            )}
           </div>
 
           {/* Connect or Disconnect button */}
@@ -161,8 +227,13 @@ export default function App() {
           )}
         </div>
 
-        {/* Only show routes once wallet is connected */}
-        {provider && (
+        {/* Display warning if on wrong network */}
+        <div>
+          <p className="networkWarning">{networkWarning}</p>
+        </div>
+
+        {/* Only show routes once wallet is connected and network is correct */}
+        {provider && networkWarning === "" && (
           <Routes>
             {/* Home Route: Admin + Create + Contribute + Withdraw + Project List */}
             <Route
@@ -170,18 +241,33 @@ export default function App() {
               element={
                 <>
                   <div className="three-column-layout">
-                    <div className="column admin-panel-col">
-                      <AdminPanel contract={contract} />
-                    </div>
+                    {isAdmin && (
+                      <div className="column admin-panel-col">
+                        <AdminPanel contract={contract} />
+                      </div>
+                    )}
 
-                    <div className="column create-project-col">
-                      <CreateProject contract={contract} reloadProjects={loadProjects} />
-                    </div>
+                    {!isAdmin && (
+                      <div className="column create-project-col">
+                        <CreateProject
+                          contract={contract}
+                          reloadProjects={loadProjects}
+                        />
+                      </div>
+                    )}
 
-                    <div className="column contribute-withdraw-col">
-                      <Contribute contract={contract} reloadProjects={loadProjects} />
-                      <EarlyWithdrawal contract={contract} reloadProjects={loadProjects} />
-                    </div>
+                    {!isAdmin && (
+                      <div className="column contribute-withdraw-col">
+                        <Contribute
+                          contract={contract}
+                          reloadProjects={loadProjects}
+                        />
+                        <EarlyWithdrawal
+                          contract={contract}
+                          reloadProjects={loadProjects}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Display project list below form actions */}
