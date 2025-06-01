@@ -24,6 +24,11 @@ const CONTRACT_ABI = [
         "type": "constructor"
     },
     {
+        "inputs": [],
+        "name": "ReentrancyGuardReentrantCall",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {

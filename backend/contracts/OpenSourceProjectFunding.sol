@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-contract OpenSourceProjectFunding {
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
+contract OpenSourceProjectFunding is ReentrancyGuard {
     // Structure to represent a project
     struct Project {
         uint256 projectNumber;          // Unique identifier for the project
@@ -116,7 +118,7 @@ contract OpenSourceProjectFunding {
     }
 
     // Function to contribute funds to a project
-    function contribute(uint256 _projectId) public payable {
+    function contribute(uint256 _projectId) public payable nonReentrant {
         require(_projectId < projectCount, "Invalid project ID");
 
         updateProjectStatus(); // Ensure status is up to date
@@ -169,7 +171,7 @@ contract OpenSourceProjectFunding {
     }
 
     // Function to withdraw early from the project
-    function withdrawEarly(uint256 _projectId) public payable {
+    function withdrawEarly(uint256 _projectId) public payable nonReentrant {
         require(_projectId < projectCount, "Invalid project ID");
 
         updateProjectStatus(); // Ensure up-to-date status
