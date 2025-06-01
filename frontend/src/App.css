@@ -2,6 +2,13 @@
     font-family: 'Roboto', sans-serif;
 }
 
+.networkWarning {
+    color: red;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 1rem;
+}
+
 .three-column-layout {
     display: flex;
     gap: 30px;
@@ -75,7 +82,7 @@
 .account-info {
     font-size: 0.9rem;
     font-family: monospace;
-    margin-top: 5px;
+    margin: 7px 0 0 0;
     color: #c9d1d9;
     white-space: nowrap;
     overflow: hidden;
