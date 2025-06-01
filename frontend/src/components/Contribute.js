@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./Contribute.css";
 
@@ -32,6 +32,13 @@ export default function Contribute({ contract, reloadProjects }) {
             setMessage("Contribution failed: " + (err?.reason || "Unknown error")); // Show error message
         }
     }
+
+    useEffect(() => {
+        if (!message) return;
+
+        const timer = setTimeout(() => setMessage(""), 4000);
+        return () => clearTimeout(timer);
+    }, [message]);
 
     // Render the contribution form
     return (

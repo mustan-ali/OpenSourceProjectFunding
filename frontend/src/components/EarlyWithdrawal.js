@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./EarlyWithdrawal.css";
 
@@ -46,6 +46,13 @@ export default function ProjectWithdraw({ contract, reloadProjects }) {
 
         setLoading(false);
     }
+
+    useEffect(() => {
+        if (!message) return;
+
+        const timer = setTimeout(() => setMessage(""), 4000);
+        return () => clearTimeout(timer);
+    }, [message]);
 
     // Render the withdrawal component
     return (

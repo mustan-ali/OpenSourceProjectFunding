@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./CreateProject.css";
 
@@ -58,6 +58,13 @@ export default function CreateProject({ contract, reloadProjects }) {
             setMessage("Project creation failed: " + (err?.reason || "Unknown error"));
         }
     }
+
+    useEffect(() => {
+        if (!message) return;
+
+        const timer = setTimeout(() => setMessage(""), 4000);
+        return () => clearTimeout(timer);
+    }, [message]);
 
     // Render the project creation form
     return (

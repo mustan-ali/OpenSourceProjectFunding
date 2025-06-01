@@ -40,6 +40,13 @@ export default function AdminPanel({ contract }) {
         fetchDetails();
     }, [contract]);
 
+    useEffect(() => {
+        if (!message) return;
+
+        const timer = setTimeout(() => setMessage(""), 4000);
+        return () => clearTimeout(timer);
+    }, [message]);
+
     // Update Creation Fee
     async function updateCreationFee() {
         if (!contract || !newCreationFee) {
