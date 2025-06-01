@@ -17,11 +17,11 @@ contract OpenSourceProjectFunding {
         bool isWithdrawn;               // Indicates if funds were withdrawn early
     }
 
-    uint256 projectCount;              // Total number of projects created
-    address payable contractOwner;     // Owner of the contract
-    uint256 public creationFee;        // Fee to create a project
-    uint256 public contributionFee;    // Fee deducted from each contribution
-    uint256 public earlyWithdrawalFee; // Fee required for early withdrawal
+    uint256 projectCount;                     // Total number of projects created
+    address payable public contractOwner;     // Owner of the contract
+    uint256 public creationFee;               // Fee to create a project
+    uint256 public contributionFee;           // Fee deducted from each contribution
+    uint256 public earlyWithdrawalFee;        // Fee required for early withdrawal
 
     mapping(uint256 => Project) public projects; // Mapping of project ID to Project struct
     mapping(uint256 => mapping(address => uint256)) public contributions; // Contributions per project per address
