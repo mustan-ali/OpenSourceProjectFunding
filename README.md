@@ -1,3 +1,25 @@
+# OpenSourceProjectFunding
+
+A decentralized crowdfunding platform built on Ethereum allowing users to create, fund, and manage open-source projects with transparent fees and withdrawal options.
+
+## Features
+
+- Create open-source project campaigns with funding goals and deadlines
+- Contribute Ether with a small contribution fee
+- Early withdrawal option for project owners with a fee
+- Admin-controlled fees (creation, contribution, withdrawal)
+- Project status updates (completed, expired, withdrawn)
+- Secure contract using OpenZeppelin’s ReentrancyGuard
+
+## Technologies
+
+- Solidity (0.8.20)
+- OpenZeppelin Contracts
+- React.js frontend with ethers.js for blockchain interactions
+- Hardhat for local Ethereum development and testing
+
+## Getting Started
+
 <details>
   <summary>Steps to Run the Project</summary>
 
